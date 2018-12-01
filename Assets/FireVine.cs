@@ -12,7 +12,7 @@ public class FireVine : MonoBehaviour
     private GameObject bullet;
     //public Animator vineAnim;
     //in class pc 75f was perfect, maybe with fixed update it works on both
-    private float bulletSpeed = 25f;
+    private float bulletSpeed = 500f;
     private float bulletLife = 5f;
 
     protected void Start()

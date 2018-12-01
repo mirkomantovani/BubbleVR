@@ -4,11 +4,10 @@ using UnityEngine;
 
 public class PopFinalBall : MonoBehaviour {
 
-    public Animator popAnim;
-    public AudioSource popSound;
-
 
     private float acceleration = 9.8067f;
+    private const int ScoreIncrementOnPop = 2;
+    public AudioSource popSound;
 
     private bool hit = false;
 
@@ -25,54 +24,35 @@ public class PopFinalBall : MonoBehaviour {
         if (!hit & other.tag == "bullet")
         {
             Rigidbody rigidBullet = other.gameObject.GetComponent<Rigidbody>();
+            ScoreText.IncrementScore(ScoreIncrementOnPop);
 
-            //Divide(other.gameObject.GetComponent<Info>());
-            other.gameObject.SetActive(false);
-            Destroy(other.gameObject, 1);
+            //other.gameObject.SetActive(false);
+            Destroy(other.gameObject, 0);
             hit = true;
+            DestroyBall(gameObject);
+        } else if(other.name.StartsWith("[VRTK][AUTOGEN]") & GameManager.CanDie())
+        {
+            GameManager.GameOver();
+            Invoke("RestartScene", 3);
         }
     }
 
-    //private void Divide(Info bulletInfo)
-    //{
-    //    //float bullVelX = bulletTrans.velocity.x;
-    //    //float bullVelZ = bulletTrans.velocity.z;
-
-    //    float bullVelX = bulletInfo.getX();
-    //    float bullVelZ = bulletInfo.getZ();
-
-    //    float norm = (float)Math.Sqrt(bullVelX * bullVelX + bullVelZ * bullVelZ);
-
-    //    //Debug.Log("bullVelX " + bullVelX);
-    //    //Debug.Log("bullVelZ " + bullVelZ);
-    //    bullVelZ = bullVelZ * 5;
-    //    bullVelX = bullVelX * 5;
-    //    //Debug.Log("Divide");
-    //    //Debug.Log("bullVelX " + bullVelX);
-    //    //Debug.Log("bullVelZ " + bullVelZ);
-
-    //    Transform trans = gameObject.transform;
-    //    DestroyBall(gameObject);
-
-
-    //}
-
+    private void RestartScene()
+    {
+        RestartGame.RestartScene();
+    }
 
     private void DestroyBall(GameObject ball)
     {
+        popSound.Play();
+        ball.GetComponent<MeshRenderer>().enabled = false;
         ball.GetComponent<Collider>().enabled = false;
         BallManager.RemoveBall(ball);
-        Destroy(ball, 2);
-        popSound.Play();
-        popAnim.Play("PopBall2");
+        Destroy(ball, 1);
     }
 
-
-
-
-    // Update is called once per frame
-    void Update()
-    {
-
+    public void DestroySelf(){
+        DestroyBall(gameObject);
     }
+
 }

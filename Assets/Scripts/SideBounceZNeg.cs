@@ -6,6 +6,7 @@ public class SideBounceZNeg : MonoBehaviour {
 
     // Use this for initialization
     private readonly float EPSILON = 0.01f;
+    public AudioSource metalSound;
 
     void Start () {
 		
@@ -25,9 +26,15 @@ public class SideBounceZNeg : MonoBehaviour {
                 ballRB.velocity = new Vector3(ballRB.velocity.x, ballRB.velocity.y, 0.1f);
             }
 
-            //Debug.Log("z velocity new wall: " + ballRB.velocity.z);
+        }
+        else if (other.tag == "bullet")
+        {
 
-
+            GameObject MetalImpact = (GameObject)Instantiate(Resources.Load("MetalImpact"));
+            Vector3 bulletPos = other.transform.position;
+            MetalImpact.transform.position = new Vector3(bulletPos.x, bulletPos.y, bulletPos.z);
+            Destroy(other.gameObject,0);
+            metalSound.Play();
         }
     }
 }

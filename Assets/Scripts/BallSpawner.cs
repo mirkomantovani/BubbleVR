@@ -7,6 +7,8 @@ public class BallSpawner : MonoBehaviour {
 
     private int TimeRangeRandomSpawnMax = 20;
     private int TimeRangeRandomSpawnMin = 15;
+    private const int TimeRandomSpawnMaxMin = 5;
+    private const int TimeRandomSpawnMinMin = 0;
     private int SpawnedBalls = 0;
 
     private const int CANNON1 = 1;
@@ -14,8 +16,8 @@ public class BallSpawner : MonoBehaviour {
     private const int CANNON3 = 3;
     private const int CANNON4 = 4;
 
-    private const int CANNON_MIN_RANDOM_ROTATION = -20;
-    private const int CANNON_MAX_RANDOM_ROTATION = 21;
+    private const int CANNON_MIN_RANDOM_ROTATION = -15;
+    private const int CANNON_MAX_RANDOM_ROTATION = 16;
 
     private GameObject cannon1;
     private GameObject cannon2;
@@ -35,10 +37,11 @@ public class BallSpawner : MonoBehaviour {
 
     protected void SpawnBall(int cannon, string ballType){
 
-        Debug.Log("SpawnBall");
+        //Debug.Log("SpawnBall");
 
-        GameObject ball = (GameObject)Instantiate(Resources.Load(ballType));
         Vector3 pos = Cannon1Position;
+        GameObject ball = (GameObject)Instantiate(Resources.Load(ballType));
+        //ball.GetComponent<MeshRenderer>().enabled = false;
         Color c = ball.GetComponent<Renderer>().material.color;
 
         switch(cannon){
@@ -62,8 +65,10 @@ public class BallSpawner : MonoBehaviour {
 
         pos = AdjustPosition(pos, ballType);
         ball.GetComponent<Rigidbody>().position = pos;
+        //ball.GetComponent<MeshRenderer>().enabled = true;
 
         BallManager.AddBall(ball);
+        SpawnedBalls++;
     }
 
     //adjusting smaller balls' y start position
@@ -101,8 +106,14 @@ public class BallSpawner : MonoBehaviour {
 
     protected void StartRecursiveRandomBallGenerator(int RangeTime){
         TimeRangeRandomSpawnMax = RangeTime;
-       
+        TimeRangeRandomSpawnMin = TimeRangeRandomSpawnMax - (TimeRandomSpawnMaxMin - TimeRandomSpawnMinMin);
+
+
         Invoke("GenerateRandomSpawningRecursive", 2);
+    }
+
+    public void CancelAllInvokes(){
+        CancelInvoke();
     }
 
     private void GenerateRandomSpawningRecursive(){
@@ -111,10 +122,10 @@ public class BallSpawner : MonoBehaviour {
         int cannonNumber = random.Next(1, 5);
         int ballNumber = random.Next(0, 3);
         string ballType = BallString(ballNumber);
-        Debug.Log("GenerateRandomSpawningRecursive");
-        Debug.Log(spawnIn);
-        Debug.Log(cannonNumber);
-        Debug.Log(ballNumber);
+        //Debug.Log("GenerateRandomSpawningRecursive");
+        //Debug.Log(spawnIn);
+        //Debug.Log(cannonNumber);
+        //Debug.Log(ballNumber);
 
 
         SpawnBall(cannonNumber, ballType, spawnIn);
@@ -151,9 +162,9 @@ public class BallSpawner : MonoBehaviour {
 
     IEnumerator SpawnLater(int cannon, string ballType, float delayTime)
     {
-        Debug.Log("SpawnLater");
+        //Debug.Log("SpawnLater");
         yield return new WaitForSeconds(delayTime);
-        Debug.Log("SpawnLater continue");
+        //Debug.Log("SpawnLater continue");
         SpawnBall(cannon, ballType);
     }
 
@@ -187,8 +198,24 @@ public class BallSpawner : MonoBehaviour {
 
     }
 	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+    public void IncrementTimeRangeRandomSpawnMax(int seconds){
+        if(TimeRangeRandomSpawnMax+seconds > TimeRandomSpawnMaxMin){
+            TimeRangeRandomSpawnMax += seconds;
+        }
+        else {
+            TimeRangeRandomSpawnMax = TimeRandomSpawnMaxMin;
+        }
+    }
+
+    public void IncrementTimeRangeRandomSpawnMin(int seconds)
+    {
+        if (TimeRangeRandomSpawnMin + seconds > TimeRandomSpawnMinMin)
+        {
+            TimeRangeRandomSpawnMin += seconds;
+        }
+        else
+        {
+            TimeRangeRandomSpawnMin = TimeRandomSpawnMinMin;
+        }
+    }
 }

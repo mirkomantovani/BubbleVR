@@ -9,6 +9,8 @@ public class PopBall : MonoBehaviour {
     public Animator popAnim;
     public AudioSource popSound;
 
+    private const int ScoreIncrementOnPop = 1;
+
     private float acceleration = 9.8067f;
 
     private bool hit = false;
@@ -21,22 +23,30 @@ public class PopBall : MonoBehaviour {
     //Colliding with bullet
     private void OnTriggerEnter(Collider other)
     {
-       //Debug.Log("collider ball something entered");
+        //Debug.Log(other.name);
         if (!hit & other.tag == "bullet")
         {
             //Debug.Log(other.name+ " hit ball");
             Rigidbody rigidBullet = other.gameObject.GetComponent<Rigidbody>();
-
+            ScoreText.IncrementScore(ScoreIncrementOnPop);
             //Debug.Log("bullVelX " + rigidBullet.velocity.x);
             //Debug.Log("bullVelY " + rigidBullet.velocity.y);
             //Debug.Log("bullVelZ " + rigidBullet.velocity.z);
 
             //Destroy(other.gameObject);
             Divide(other.gameObject.GetComponent<Info>());
-            other.gameObject.SetActive(false);
-            Destroy(other.gameObject,1);
+            //other.gameObject.SetActive(false);
+            Destroy(other.gameObject,0);
             hit = true;
+        } else if(other.name.StartsWith("[VRTK][AUTOGEN]") & GameManager.CanDie()){
+            GameManager.GameOver();
+            Invoke("RestartScene", 3);
         }
+    }
+
+    private void RestartScene()
+    {
+        RestartGame.RestartScene();
     }
 
     private void Divide(Info bulletInfo)
@@ -60,10 +70,11 @@ public class PopBall : MonoBehaviour {
         Transform trans = gameObject.transform;
         DestroyBall(gameObject);
         float velY = ComputeInitialYVelocity(trans.position.y);
-        //Debug.Log(velY);
-
-        //ball2 = GameObject.FindGameObjectWithTag("ball2");
-
+        if(velY != velY)
+        {
+            velY = 5.0f;
+        }
+            
 
         trans.position = new Vector3(trans.position.x, trans.position.y, trans.position.z);
         GameObject newBall = (GameObject)Instantiate(ball2, trans.position, trans.rotation);
@@ -76,13 +87,41 @@ public class PopBall : MonoBehaviour {
         GameObject newBall2 = (GameObject)Instantiate(ball2, trans.position, trans.rotation);
         BallManager.AddBall(newBall2);
         newBall2.GetComponent<Rigidbody>().velocity = new Vector3(bullVelZ, velY, -bullVelX);
+    }
 
+    //divide due to effect of bomb
+    public void Divide()
+    {
 
+        float bullVelX = 0.1f;
+        float bullVelZ = 0.1f;
+
+        float norm = (float)Math.Sqrt(bullVelX * bullVelX + bullVelZ * bullVelZ);
+
+        bullVelZ = bullVelZ * 5;
+        bullVelX = bullVelX * 5;
+
+        Transform trans = gameObject.transform;
+        DestroyBall(gameObject);
+        float velY = ComputeInitialYVelocity(trans.position.y);
+        //Debug.Log(velY);
+
+        trans.position = new Vector3(trans.position.x, trans.position.y, trans.position.z);
+        GameObject newBall = (GameObject)Instantiate(ball2, trans.position, trans.rotation);
+        BallManager.AddBall(newBall);
+        newBall.GetComponent<Rigidbody>().velocity = new Vector3(-bullVelZ, 0, bullVelX);
+
+        newBall.GetComponent<AudioSource>().Play();
+
+        trans.position = new Vector3(trans.position.x, trans.position.y, trans.position.z);
+        GameObject newBall2 = (GameObject)Instantiate(ball2, trans.position, trans.rotation);
+        BallManager.AddBall(newBall2);
+        newBall2.GetComponent<Rigidbody>().velocity = new Vector3(bullVelZ, 0, -bullVelX);
     }
 
     private float ComputeInitialYVelocity(float posY){
         //velY = sqrt((wantedHeight - initialPosY)*2*g)
-        int targetHeight = 4;
+        float targetHeight = BallFactory.GetPoppedBallTargetHeight(gameObject.tag);
 
         return (float)Math.Sqrt((targetHeight - posY) * 2 * acceleration);
         

@@ -11,6 +11,7 @@ TagManager:
   - hit
   - end
   - wall
+  - freeze
   layers:
   - Default
   - TransparentFX

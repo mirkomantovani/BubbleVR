@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,20 +10,70 @@ public class StayingAlive : BallSpawner, IGameMode
     private const int CANNON3 = 3;
     private const int CANNON4 = 4;
 
+    private const string SPECIAL0 = "Snowflake";
+    private const string SPECIAL1 = "Bomb";
+    private const string SPECIAL2 = "Shield";
+
+    private const int SPECIALITEMSCOUNT = 3;
+
+    private System.Random random = new System.Random();
+
+    protected const int HARDER_LEVEL_TIME = 30;
+
     private const string BALL0 = "Ball0";
     private const string BALL = "Ball";
     private const string BALL2 = "Ball2";
+     
 
     public void StartPlaying()
     {
-        StartRecursiveRandomBallGenerator(20);
-        //SpawnBall(CANNON1, BALL2,2.0f);
-        //SpawnBall(CANNON3, BALL, 5.0f);
-        //SpawnBall(CANNON2, BALL0, 10.0f);
+        Debug.Log("Staying alive start playing");
+        StartRecursiveRandomBallGenerator(15);
+        StartRecursiveRandomSpecialItemGenerator(30);
+
+        // To Cancel all Invoke calls
+        //CancelInvoke();
+        InvokeRepeating("HardenLevel", HARDER_LEVEL_TIME, HARDER_LEVEL_TIME);
 
     }
 
-    private 
+    protected void StartRecursiveRandomSpecialItemGenerator(int seconds){
+        InvokeRepeating("SpawnRandomSpecialItem", seconds, seconds);
+    }
+
+    private void SpawnRandomSpecialItem(){
+        int itemNumber = random.Next(0, SPECIALITEMSCOUNT);
+        SpawnRandomSpecialItem(itemNumber);
+    }
+
+    private void SpawnRandomSpecialItem(int itemNumber)
+    {
+        string specialName = SPECIAL0;
+        switch(itemNumber){
+            case 0:
+                specialName = SPECIAL0;
+                break;
+            case 1:
+                specialName = SPECIAL1;
+                break;
+            case 2:
+                specialName = SPECIAL2;
+                break;
+
+        }
+
+        float x = (float)random.NextDouble() * 2 - 1f;
+        float z = (float)random.NextDouble() * 2 - 1f;
+        float y = 8f;
+        GameObject specialItem = (GameObject)Instantiate(Resources.Load(specialName));
+        Vector3 pos = new Vector3(x, y, z);
+        specialItem.GetComponent<Rigidbody>().position = pos;
+    }
+
+    private void HardenLevel(){
+        IncrementTimeRangeRandomSpawnMax(-1);
+        IncrementTimeRangeRandomSpawnMin(-1);
+    }
 
     // Use this for initialization
     new void Start () {
