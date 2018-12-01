@@ -14,6 +14,10 @@ public class TimerShield : MonoBehaviour {
         startTime = Time.time;
     }
 
+    public void resetTime(){
+        startTime = Time.time;
+    }
+
     // Update is called once per frame
     void Update()
     {
